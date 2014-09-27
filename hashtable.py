@@ -11,7 +11,9 @@
             sondagens a partir da posicao k: k+1, k+2, k+3...
 
     * Entrada: numeros inteiros positivos e sem repeticao de chaves
+
 """
+__author__ = 'thales'
 from __builtin__ import range
 #biblioteca utilizada para gerar numeros aleatorios
 import numpy as np
@@ -30,7 +32,8 @@ chavesNaTabela = 0
 # Valor maximo do intervalo de numeros aleatorios
 valorMaximo = tamanhoTabela * 2
 
-def funcaoHash(chave, tabelaHash):
+
+def funcaoHash(chave):
     """ Funcao Hash
         Entrada:    chave (valor inteiro positivo)
                     tabelaHash onde sera realizado a operacao
@@ -77,7 +80,7 @@ def funcaoHash(chave, tabelaHash):
     chavesNaTabela += 1
 
 
-def populaTabela(tabelaHash, percentagem):
+def populaTabela(percentagem):
     """ Funcao Popula Tabela
         Entrada:    tabelaHash a ser populada
                     percentagem desejada a ser preenchida
@@ -92,12 +95,11 @@ def populaTabela(tabelaHash, percentagem):
 
     # Realizer insercao ateh que percentagem seja atingida
     while percentagem > ((chavesNaTabela * 100) / tamanhoTabela):
-        funcaoHash(np.random.random_integers(1, valorMaximo),
-                   tabelaHash)
+        funcaoHash(np.random.random_integers(1, valorMaximo))
         #print "Atual: " + str(((chavesNaTabela * 100) / tamanhoTabela))
 
 
-def buscaChave(chave, tabelaHash):
+def buscaChave(chave):
     """ Funcao Busca Chave
         Entrada:    chave a ser buscada
                     tabela hash onde a busca sera realizada
@@ -118,35 +120,86 @@ def buscaChave(chave, tabelaHash):
             posicao = (posicao + 1) % tamanhoTabela
             nroSondagens += 1
     # a chave nao esta inserida nesta tabelaHash
-    return False
+    return nroSondagens
 
 
-""" Metodo main
-"""
+def calculaSondagem(bemSucedida):
+    """ Funcao Calcula Sondagem
+        Entrada:    Valor inteiro 0 caso queira sondagem bem sucedida
+                    Qualquer outro valor para sondagem mal sucedida
+        Descricao:  Sondagem Bem Sucedida
+                    *   Realizar uma busca com todas as chaves existentes
+                        na tabela e ir armazenando o numero de sondagem
+                        realizado em cada uma dessas buscas.
+                        Ao final, retornar a media destas sondagens
+                    Sondagem Mal Sucedida
+                    *   Realizar uma busca 5 vezes maior que a quantidade
+                        de elementos presentes na tabela com valores
+                        nao presentes na mesma.
+                        Armazenar toda a sondagem realizada e ao final
+                        retornar a media destas sondagens
+        Retorno:    media de sondagens
+    """
+    sondagem = []
+    # Sondagem Bem Sucedida
+    if bemSucedida is 0 and chavesNaTabela is not 0:
+        for chave in tabelaHash:
+            if chave is not False:
+                sondagem.append(buscaChave(chave))
+        # retorna a soma das sondagens dividida pelo numero de consultas
+        # sendo o numero de consultas o tamanho da lista de sondagem
+        return float(np.sum(sondagem)) / float(len(sondagem))
+    # Sondagem Mal Sucedida
+    elif chavesNaTabela is not 0:
+        # Realizar a busca em 5 vezes qtd de chaves na tabela
+        for i in range(chavesNaTabela * 5):
+            # Aleatoriamente buscar uma chave que nao existe na tabela
+            chave = np.random.random_integers(1, valorMaximo)
+            while chave in tabelaHash:
+                chave = np.random.random_integers(1, valorMaximo)
+            # Adicionar numero de sondagens na lista
+            sondagem.append(buscaChave(chave))
+        # Retorna a soma das sondagens dividida pelo numero de consultas
+        return float(np.sum(sondagem)) / float(len(sondagem))
 
+
+# Dicionario utilizado como MENU
 def sair():
     print "Ate logo"
 
+
 def popular_tabela():
     print "\nPopular tabela, digite a percentagem desejada: "
-    populaTabela(tabelaHash, input())
+    populaTabela(input())
+
 
 def buscar_chave():
     print "\nBuscar chave, digite a chave que deseja buscar: "
-    print "Sondagens: " + str(buscaChave(input(), tabelaHash))
+    print "Sondagens: " + str(buscaChave(input()))
+
 
 def exibir_tabela():
     print tabelaHash
+
+
+def calcular_sondagem():
+    print "\nCalcular Sondagem: Digite qual tipo quer calcular\n" \
+          "\tpara Bem Sucedidade: 0\n" \
+          "\tpara Mal Sucedida: 1"
+    print calculaSondagem(input())
+
 
 options = {
     0: sair,
     1: popular_tabela,
     2: buscar_chave,
     3: exibir_tabela,
+    4: calcular_sondagem,
 }
 
 
-
+""" Metodo main
+"""
 if __name__ == '__main__':
 
     if debugMode:
@@ -157,7 +210,7 @@ if __name__ == '__main__':
         print "Tabela Hash vazia:\n\t" + str(tabelaHash)
 
         # popula a tabela com o valor desejado em percentagem
-        populaTabela(tabelaHash, 75)
+        populaTabela(75)
 
         print "Tabela Hash apos ser populada:\n\t" + str(tabelaHash)
         print "Percentagem populada: " + \
@@ -165,8 +218,7 @@ if __name__ == '__main__':
 
         # Realiza a busca de um range(n) de chaves geradas aleatoriamente
         for i in range(5):
-            buscaChave(np.random.random_integers(1, valorMaximo),
-                       tabelaHash)
+            buscaChave(np.random.random_integers(1, valorMaximo))
 
     op = -1
     while op is not 0:
@@ -174,6 +226,7 @@ if __name__ == '__main__':
               "\t1) Popular a tabela\n" \
               "\t2) Buscar chave\n" \
               "\t3) Exibir Tabela\n" \
+              "\t4) Calcular Sondagem\n" \
               "\t0) Sair\n" \
               "Digite a opcao desejada: "
         op = input()
