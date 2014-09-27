@@ -19,7 +19,7 @@ import numpy as np
 """ Variaveis para configuracao
 """
 # debugMode: mudar para True caso queira informacoes das passagens
-debugMode = True
+debugMode = False
 # Tamanho da Tabela Hash (utilizar numero primo)
 # Lista de numeros primos: https://en.wikipedia.org/wiki/List_of_prime_numbers
 # Alguns valores:   13 , 1069 , 10007 , 100103 ,ba 1000003
@@ -28,10 +28,7 @@ tamanhoTabela = 13
 tabelaHash = [False for i in range(tamanhoTabela)]
 chavesNaTabela = 0
 # Valor maximo do intervalo de numeros aleatorios
-valorMaximo = 100
-# Quantidade de chaves a serem inseridas
-qtdChaves = 10
-
+valorMaximo = tamanhoTabela * 2
 
 def funcaoHash(chave, tabelaHash):
     """ Funcao Hash
@@ -50,7 +47,6 @@ def funcaoHash(chave, tabelaHash):
                         posicao += 1
                     ateh que seja encontrado uma posicao vazia
     """
-
     # Verificacao se chave eh um valor valido
     # Valor gerado da chave ja esta inserido, nao aceita repeticoes
     if chave in tabelaHash:
@@ -59,10 +55,8 @@ def funcaoHash(chave, tabelaHash):
             chave = np.random.random_integers(1, valorMaximo)
         if debugMode:
             print "Ja existe -- nova chave valida gerada"
-
     # calculo da posicao h(c) = c % tamanho
     posicao = chave % tamanhoTabela
-
     # Insercao na tabela Hash
     if tabelaHash[posicao] is False:
         # se a posicao estiver vazia -> disponivel
@@ -70,7 +64,6 @@ def funcaoHash(chave, tabelaHash):
         if debugMode:
             print("Chave " + str(chave) +
                   " inserida em " + str(posicao) + " SEM colisao.")
-
     else:
         # a posicao ja esta ocupada
         # calcula sondagem ate encontrar posicao vazia
@@ -91,30 +84,68 @@ def populaTabela(tabelaHash, percentagem):
         Descricao:  Enquanto a percentagem de ocupacao da tabela hash
                     for menor que a desejada, inserir nova chave
     """
+    global chavesNaTabela
+    # A tabela ja foi populada previamente, zerar ela primeramente
+    for i in range(tamanhoTabela):
+        tabelaHash[i] = False
+    chavesNaTabela = 0
+
+    # Realizer insercao ateh que percentagem seja atingida
     while percentagem > ((chavesNaTabela * 100) / tamanhoTabela):
         funcaoHash(np.random.random_integers(1, valorMaximo),
                    tabelaHash)
+        #print "Atual: " + str(((chavesNaTabela * 100) / tamanhoTabela))
 
 
 def buscaChave(chave, tabelaHash):
     """ Funcao Busca Chave
         Entrada:    chave a ser buscada
                     tabela hash onde a busca sera realizada
-        Descricao:  Buscar chave na tabela hash, se for encontrada
-                    exibe na tela a chave e a sua posicao
-                    caso contrario exibe na tela que a chave nao
-                    foi encontrada na tabela
+        Descricao:  Buscar chave na tabela hash, utilizando a funcao
+                    hash como busca.
+        Retorno:    Numero de sondagens para aquela busca.
     """
-    if chave in tabelaHash:
-        print "Chave " + str(chave) + \
-              " na posicao " + str(tabelaHash.index(chave))
-    else:
-        print "Chave " + str(chave) + \
-              " nao encontrada"
+    nroSondagens = 0
+    # calculo da posicao h(c) = c % tamanho
+    posicao = chave % tamanhoTabela
+    # realiza a sondagem enquanto o valor na posicao nao for falso
+    while tabelaHash[posicao] is not False:
+        if tabelaHash[posicao] is chave:
+            # chave encontrada, retornar numero de sondagens
+            return nroSondagens
+        else:
+            # chave nao encontrada, buscar na proxima posicao
+            posicao = (posicao + 1) % tamanhoTabela
+            nroSondagens += 1
+    # a chave nao esta inserida nesta tabelaHash
+    return False
 
 
 """ Metodo main
 """
+
+def sair():
+    print "Ate logo"
+
+def popular_tabela():
+    print "\nPopular tabela, digite a percentagem desejada: "
+    populaTabela(tabelaHash, input())
+
+def buscar_chave():
+    print "\nBuscar chave, digite a chave que deseja buscar: "
+    print "Sondagens: " + str(buscaChave(input(), tabelaHash))
+
+def exibir_tabela():
+    print tabelaHash
+
+options = {
+    0: sair,
+    1: popular_tabela,
+    2: buscar_chave,
+    3: exibir_tabela,
+}
+
+
 
 if __name__ == '__main__':
 
@@ -136,3 +167,14 @@ if __name__ == '__main__':
         for i in range(5):
             buscaChave(np.random.random_integers(1, valorMaximo),
                        tabelaHash)
+
+    op = -1
+    while op is not 0:
+        print "T2 ORI UFSCAR 2014\n" \
+              "\t1) Popular a tabela\n" \
+              "\t2) Buscar chave\n" \
+              "\t3) Exibir Tabela\n" \
+              "\t0) Sair\n" \
+              "Digite a opcao desejada: "
+        op = input()
+        options[op]()
