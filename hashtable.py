@@ -202,6 +202,7 @@ options = {
 """
 if __name__ == '__main__':
 
+    # Realizar as operacoes de modo 'manual' direto no codigo
     if debugMode:
         print "Debug Mode ativado!\n" \
               "Informacoes adicionais SERAO exibidas no terminal!\n" \
@@ -220,14 +221,16 @@ if __name__ == '__main__':
         for i in range(5):
             buscaChave(np.random.random_integers(1, valorMaximo))
 
-    op = -1
-    while op is not 0:
-        print "T2 ORI UFSCAR 2014\n" \
-              "\t1) Popular a tabela\n" \
-              "\t2) Buscar chave\n" \
-              "\t3) Exibir Tabela\n" \
-              "\t4) Calcular Sondagem\n" \
-              "\t0) Sair\n" \
-              "Digite a opcao desejada: "
-        op = input()
-        options[op]()
+    # Fora do modo debug, utilizar 'menu interativo'
+    else:
+        op = -1
+        while op is not 0:
+            print "T2 ORI UFSCAR 2014\n" \
+                  "\t1) Popular a tabela\n" \
+                  "\t2) Buscar chave\n" \
+                  "\t3) Exibir Tabela\n" \
+                  "\t4) Calcular Sondagem\n" \
+                  "\t0) Sair\n" \
+                  "Digite a opcao desejada: "
+            op = input()
+            options[op]()
